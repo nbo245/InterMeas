@@ -14,3 +14,5 @@ TODO:
 * add references to labelimg/anaconda/yolo
 * add analysis to measure importance of internode lengths in predicting maize phenotypes
 * add function to clean potential erronous annotations from periphery of image
+* make --source 0 optional for people w/ gpu setup
+*
