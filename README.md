@@ -2,7 +2,6 @@
 An R Shiny dashboard wrapping a few python scripts and object detection algorithms into an easy to use internode measurment workflow.
 
 TODO:
-* change input$prep_button to take user input values w/ defaults set to 1 and 10
 * add progress bars to appropriate section (cropping, yolo annotating, prep, and Internodal measurements)
 * add slickR to visulize outputs during final internodal measurement step
 * write tutorial on how to go from input images to final output
@@ -14,5 +13,4 @@ TODO:
 * add references to labelimg/anaconda/yolo
 * add analysis to measure importance of internode lengths in predicting maize phenotypes
 * add function to clean potential erronous annotations from periphery of image
-* make --source 0 optional for people w/ gpu setup
 *
