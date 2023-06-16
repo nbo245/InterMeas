@@ -21,7 +21,9 @@ pacman::p_load(shiny,
                tidyverse)
 
 #setup python environments
-reticulate::use_condaenv("tensor2")
+reticulate::use_condaenv("InterMeas", required = T)
+
+#py_config()#check environment was setup correctly
 
 #load in configurations
 configs <- read.delim("configs_mod.txt", header = F, sep = " ")
@@ -29,7 +31,7 @@ yolo_dir <-trimws(configs[5,2])
 labelimg_location <- trimws(configs[6,2])
 weights_file <- trimws(configs[7,2])
 
-#initialize libraries for script
+#initialize libraries for script and add yolo path 
 py_run_file("python_libraries.py") 
 
 #load helper functions
@@ -60,6 +62,7 @@ ui <- dashboardPage(
                   h1("Cropped Directory"),
                   tags$p("Select the directory containing the cropped images you'd like to annotate.  Make sure all images in directory contain a single, inverted stalk (bottom of stalk should be at top of image).  Once selected, click the 'Run Annotation Script' button below."),
                   shinyDirButton(title = "Select folder containing cropped images", id = "annotation_browse", label = "Cropped Image Location.", multiple =F),
+                  selectInput(inputId = "acceleration", label = "If GPU acceleration is available, select GPU: ", choices = c("CPU","GPU"), selected = "GPU", multiple = F),
                   actionButton("annotation_button", label = "Run Annotation Script."),
                   h5(textOutput("selected_annot_image_path"))),
                 box(
@@ -76,6 +79,8 @@ ui <- dashboardPage(
                   h1("Labels in Cropped directory"),
                   tags$p("Select the directory containing the verified labels from previous annotation step.  Once selected, click the 'Make Details File' button below."),
                   shinyDirButton(title = "Select folder containing cropped images", id = "cropped_images_path", label = "Cropped Image Location.", multiple =F),
+                  numericInput(inputId = "start_point",label = "ID Start",value = 1, min = 1),
+                  numericInput(inputId = "end_point",label = "ID End",value = 10, min = 1),
                   actionButton(inputId = "prep_button", label = "Make Details File")),
                 box(
                   title = "5) Internodal Measurement", status = "primary", solidHeader = TRUE, width = 6, height = 300,
@@ -134,7 +139,8 @@ server <- function(input, output, session) {
     if (req(input$annotation_button) > 0) {
       annotation_function(cropped_dir = parseDirPath(roots = volumes, input$annotation_browse),
                           weights_file = weights_file,
-                          yolo_dir = yolo_dir)
+                          yolo_dir = yolo_dir,
+                          acceleration = input$acceleration)
     }
   })
   
@@ -159,8 +165,8 @@ server <- function(input, output, session) {
   observeEvent(eventExpr = input$prep_button, {
     if (req(input$prep_button) > 0) {
       prep_function(cropped_dir = parseDirPath(roots = volumes, input$cropped_images_path),
-                    start_point = 1, #change starting/stopping to be user inputable
-                    stop_point = 10)
+                    start_point = input$start_point,
+                    stop_point = input$end_point)
     }
   })
   
