@@ -1,9 +1,7 @@
 #shiny app for using yolo object detection algo to measure internode lengths in
 #maize stalks
 
-#setwd("d:/2021_image_analysis/shiny_annotator_end_of_summer/shiny_annotator/")
 #load libraries required for shiny app
-
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(shiny,
                #jpeg,
