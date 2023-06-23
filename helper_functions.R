@@ -4,18 +4,35 @@ cropper_function <- function(x){
   system(paste("python cropper_v3.py -input", x))
 }
 
-annotation_function <- function(yolo_dir, weights_file, cropped_dir){
+annotation_function <- function(yolo_dir, weights_file, cropped_dir,acceleration){
+  #print(yolo_dir)
+  #print(cropped_dir)
+  #Convert yolo_dir and cropped_dir to absolute paths
+  #yolo_dir <- normalizePath(yolo_dir, mustWork = FALSE)
+  #cropped_dir <- normalizePath(cropped_dir, mustWork = FALSE)
+  #print(yolo_dir)
+  #print(cropped_dir)
+
+  #Run detect.py
   system(paste("python ",
                yolo_dir,
                "detect.py --weights ", weights_file,
                " --source ", cropped_dir,
-               " --img-size 1632 --device 0 --save-txt --nosave --iou-thres 0.2",
+               paste0(" --img-size 1632 --device ",
+                      if (acceleration=="GPU") {"0"}
+                      else{"cpu"},
+                      " --save-txt --nosave --iou-thres 0.2", sep=""),
                " --project ",
                cropped_dir,
                " --exist-ok",
                sep = ""))
-  #make a classes.txt file for verification
-  fileConn<-file("Resized_Outputs/exp/labels/classes.txt")
+  
+  # Make a classes.txt file for verification
+  classes_file <- file.path("Resized_Outputs", "exp", "labels", "classes.txt")
+  if (!file.exists(classes_file)) {
+    dir.create(dirname(classes_file), recursive = TRUE)
+  }
+  fileConn <- file(classes_file, open = "w")
   writeLines("node", fileConn)
   close(fileConn)
 }
