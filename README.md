@@ -65,3 +65,4 @@ TODO:
 * move outputs into a dedicated output folder
 * add analysis to measure importance of internode lengths in predicting maize phenotypes
 * add function to clean potential erronous annotations from periphery of image
+* add .pt file to repo
