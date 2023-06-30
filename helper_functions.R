@@ -141,7 +141,7 @@ analysis_function <- function(cropped_dir){
   annotation_info$Sum_Internodes <- ave(annotation_info$Distance, annotation_info$annotation_id, FUN=sum)
   z_score <- annotation_info[,c(10,13)] %>%
       group_by(Internode) %>%
-      mutate(z_score = (Distance - mean(Distance))/sd(Distance)) %>%
+      mutate(z_score = (Distance - mean(Distance))/sd(Distance)) %>% 
       ungroup() %>%
       select(z_score) %>% unlist() %>% unname()
   
@@ -152,9 +152,12 @@ analysis_function <- function(cropped_dir){
 
   #widen data
   wide_data<- annotation_info %>%
-  group_by(annotation_id) %>%
-  spread(Internode, Distance) %>% summarize(across(everything(), ~ first(na.omit(.))))
-  colnames(wide_data)[15:length(wide_data)]<-paste("Internode", colnames(wide_data)[15:length(wide_data)], sep = "_")
+    group_by(annotation_id) %>%
+    mutate(max_z_score = if_else(abs(z_score) == max(abs(z_score)), z_score, NA)) %>%
+    tidyr::fill(max_z_score) %>%
+    spread(Internode, Distance) %>%
+    summarize(across(everything(), ~ first(na.omit(.))))
+  colnames(wide_data)[16:length(wide_data)]<-paste("Internode", colnames(wide_data)[16:length(wide_data)], sep = "_")
   wide_data$Node<-NULL
   wide_data$Pixel_Distance <- NULL
 
