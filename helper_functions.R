@@ -4,7 +4,7 @@ cropper_function <- function(x){
   system(paste("python cropper_v3.py -input", x))
 }
 
-annotation_function <- function(yolo_dir, weights_file, cropped_dir,acceleration){
+annotation_function <- function(yolo_dir, weights_file, cropped_dir,acceleration, project){
   #print(yolo_dir)
   #print(cropped_dir)
   #Convert yolo_dir and cropped_dir to absolute paths
@@ -23,7 +23,7 @@ annotation_function <- function(yolo_dir, weights_file, cropped_dir,acceleration
                       else{"cpu"},
                       " --save-txt --nosave --iou-thres 0.2", sep=""),
                " --project ",
-               cropped_dir,
+               project,
                " --exist-ok",
                sep = ""))
   
@@ -101,9 +101,8 @@ analysis_function <- function(cropped_dir){
   names(annotation_info)[2:3]<-c("x_pos","y_pos")
 
   #add identifier for stalk number in dataset
-  annotation_info$Stalk_number<-annotation_info %>% 
-    group_by(annotation_id) %>% 
-    group_indices(annotation_id)
+  annotation_info<-transform(annotation_info,
+                             Stalk_number = as.numeric(factor(annotation_id)))
 
   #sort vertically by stalk
   annotation_info <- annotation_info %>% arrange(annotation_info$annotation_id,-annotation_info$y_pos)
@@ -121,7 +120,8 @@ analysis_function <- function(cropped_dir){
     group_by(annotation_id) %>%
     mutate(Node = row_number(),
            Internode = Node-1,
-           Total_Internodes = length(annotation_id)-1)
+           Total_Internodes = length(annotation_id)-1,
+           Pixel_Distance = NA)
   
   #eucledian distance calcs
   for(i in 1:nrow(annotation_info)) {
@@ -139,14 +139,52 @@ analysis_function <- function(cropped_dir){
   #pivot the data wider to collapse internode measures into a single column
   annotation_info$Internode<-factor(annotation_info$Internode, levels = c(1:length(unique(annotation_info$Internode))))
   annotation_info$Sum_Internodes <- ave(annotation_info$Distance, annotation_info$annotation_id, FUN=sum)
+  z_score <- annotation_info[,c(10,13)] %>%
+      group_by(Internode) %>%
+      mutate(z_score = (Distance - mean(Distance))/sd(Distance)) %>%
+      ungroup() %>%
+      select(z_score) %>% unlist() %>% unname()
+  
+  annotation_info$z_score <- z_score
+  
+  # Identify outliers; 2x the z-score ~95% confidence interval for a normally distributed dataset
+  annotation_info$outliers <- annotation_info$z_score >= 2 | annotation_info$z_score <= -2
 
   #widen data
   wide_data<- annotation_info %>%
   group_by(annotation_id) %>%
   spread(Internode, Distance) %>% summarize(across(everything(), ~ first(na.omit(.))))
-  colnames(wide_data)[13:length(wide_data)]<-paste("Internode", colnames(wide_data)[13:length(wide_data)], sep = "_")
+  colnames(wide_data)[15:length(wide_data)]<-paste("Internode", colnames(wide_data)[15:length(wide_data)], sep = "_")
   wide_data$Node<-NULL
-  
+  wide_data$Pixel_Distance <- NULL
+
   #write output to file
   openxlsx::write.xlsx(wide_data, "data_output.xlsx")
+}
+
+chunking_function <- function(directory){
+  #Get the list of files in the directory
+  files <- list.files(directory, full.names = TRUE)
+  
+  temp_dirs <- lapply(1:10, function(i) {
+    dir_name <- paste0(tempdir(), "/temp_dir_", i)
+    dir.create(dir_name, recursive = TRUE)
+    dir_name
+  })
+  
+  #Calculate the number of files to process (1/10th of total files)
+  numFilesToProcess <- ceiling(length(files) / 10)
+  
+  #Create symbolic links to files in each temporary directory
+  lapply(seq_along(temp_dirs), function(i) {
+    start_index <- (i - 1) * numFilesToProcess + 1
+    end_index <- min(start_index + numFilesToProcess - 1, length(files))
+    temp_files <- files[start_index:end_index]
+    
+    lapply(temp_files, function(file) {
+      link_name <- file.path(temp_dirs[[i]], basename(file))
+      file.link(file, link_name)
+    })
+  })
+  return(temp_dirs)
 }
