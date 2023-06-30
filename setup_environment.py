@@ -25,6 +25,14 @@ subprocess.run(activate_env_command, shell=True)
 pip_install_command = f"pip install {pip_packages}"
 subprocess.run(pip_install_command, shell=True)
 
+print("Installing labelImg")
+
+#Install labelImg
+labelImg_install_command = f"git clone https://github.com/heartexlabs/labelImg"
+subprocess.run(labelImg_install_command, shell=True)
+labelImg_setup_command = f"pyrcc5 -o labelImg/libs/resources.py labelImg/resources.qrc"
+subprocess.run(labelImg_setup_command,shell = True)
+
 print("Setup complete.")
 
 # Deactivate Anaconda environment
