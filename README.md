@@ -50,7 +50,6 @@ The output of **Run Analysis** button is a file called data_output.xlsx.  The fi
 - Stalk_number: A numerical identifier for the nth image/stalk analyzed in the current run
 - converter: The width of an individual image in pixels divided by the known width of the imaging background (defaults to a 36 inch width; can be changed by modifying line 114 in the helper_functions.R script)
 - Total_Internodes: The number of unique internodes idenified in a stalk
-- Pixel_Distance: Pixel distance of first internode; this isn't very useful, just checking to make sure the conversion from pixels to centimeters went well.
 - Sum_Internodes: The sum length of all imaged internodes in centimeters.
 - Internode_x: The length (in centimeters) of the "xth" internode below the primary ear bearing internode.
 
@@ -59,10 +58,9 @@ The output of **Run Analysis** button is a file called data_output.xlsx.  The fi
 Once the InterMeas algorithm is installed and functional, use [shinyShortcut](https://github.com/cran/shinyShortcut) to create an executable icon to simplify the launch of this workflow.
 
 TODO:
-* add progress bars to appropriate section (cropping, yolo annotating, prep, and Internodal measurements)
 * add slickR to visulize outputs during final internodal measurement step
 * add VCA plots back into results section
 * move outputs into a dedicated output folder
 * add analysis to measure importance of internode lengths in predicting maize phenotypes
 * add function to clean potential erronous annotations from periphery of image
-* add .pt file to repo
+
