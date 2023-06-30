@@ -1,7 +1,9 @@
 #shiny app for using yolo object detection algo to measure internode lengths in
 #maize stalks
 
+#setwd("d:/2021_image_analysis/shiny_annotator_end_of_summer/shiny_annotator/")
 #load libraries required for shiny app
+
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(shiny,
                #jpeg,
@@ -13,7 +15,9 @@ pacman::p_load(shiny,
                DT,
                reticulate,
                openxlsx,
-               #VCA,
+               #shinyWidgets,
+               waiter,
+               VCA,
                #rhandsontable,
                #ggvis, 
                tidyverse)
@@ -46,12 +50,15 @@ ui <- dashboardPage(
       # Dashboard layout for Inputs screen
       tabItem(tabName = "inputs",
               fluidRow(
+                useWaitress(),
                 box(
                   title = "1) Start Here!", status = "primary", solidHeader = TRUE, width = 4,
                   style = "height:300px; overflow-y: scroll;",
                   h1("Input Directory"),
                   tags$p("Please select the directory containing the original images.  After selecting directory, click the 'Run Cropping Script' button below."),
                   shinyDirButton(title = "Select folder with Images that need to be cropped", id = "cropper_browse", label = "Original images", multiple =F),
+                  #useWaitress(),
+                  br(),
                   actionButton("cropper_button", label = "Run Cropping Script."),
                   h5(textOutput("selected_orig_image_path"))),
                 box(
@@ -61,6 +68,7 @@ ui <- dashboardPage(
                   tags$p("Select the directory containing the cropped images you'd like to annotate.  Make sure all images in directory contain a single, inverted stalk (bottom of stalk should be at top of image).  Once selected, click the 'Run Annotation Script' button below."),
                   shinyDirButton(title = "Select folder containing cropped images", id = "annotation_browse", label = "Cropped Image Location.", multiple =F),
                   selectInput(inputId = "acceleration", label = "If GPU acceleration is available, select GPU: ", choices = c("CPU","GPU"), selected = "GPU", multiple = F),
+                  useWaitress(),
                   actionButton("annotation_button", label = "Run Annotation Script."),
                   h5(textOutput("selected_annot_image_path"))),
                 box(
@@ -91,6 +99,20 @@ ui <- dashboardPage(
                   actionButton(inputId = "analysis_button", label = "Run Analysis"))
                 )
               )
+      #add figures in next tab
+      # tabItem(tabName = "results",
+      #         fluidPage(
+      #           useWaitress(),
+      #           box(
+      #             title = "1) Start something!", status = "primary", solidHeader = TRUE, width = 4,
+      #             style = "height:300px; overflow-y: scroll;",
+      #             h1("Input Directory"),
+      #             tags$p("Please select the directory containing the original images.  After selecting directory, click the 'Run Cropping Script' button below."),
+      #             shinyDirButton(title = "Select folder with Images that need to be cropped", id = "cropper_browse", label = "Original images", multiple =F),
+      #             #useWaitress(),
+      #             br(),
+      #             actionButton("cropper_button", label = "Run Cropping Script."),
+      #             h5(textOutput("selected_orig_image_path")))))
       )
     )
   )
@@ -119,10 +141,21 @@ server <- function(input, output, session) {
   observeEvent(eventExpr = input$cropper_button, {
     shiny::req(input$cropper_browse)
     if (req(input$cropper_button) > 0) {
-      cropper_function(parseDirPath(roots = volumes, input$cropper_browse))
-    }
+      #target directory for cropping
+      directory <- parseDirPath(roots = volumes, input$cropper_browse)
+      #unlink previously created tempdirs
+      unlink(paste0(normalizePath(tempdir()), "/", dir(tempdir())), recursive = TRUE)
+      
+      #generate new temp dirs using chunking function
+      temp_dirs <- chunking_function(directory = directory)
+      withProgressWaitress({for (chunk in seq_along(temp_dirs)) {
+        cropper_function(temp_dirs[[chunk]])
+        #print(list.files(temp_dirs[[chunk]])) #for troubleshooting
+        incProgressWaitress(1) #update the progress bar incrementally
+      }}, selector = "#cropper_button", max = 10, theme = "overlay-percent")
+      }
   })
-
+  
   #what to do if annotation_browse is pressed
   observeEvent(eventExpr = input$annotation_browse, {
     if (!is_empty(input$annotation_browse)){
@@ -135,13 +168,25 @@ server <- function(input, output, session) {
   observeEvent(eventExpr = input$annotation_button, {
     shiny::req(input$annotation_browse)
     if (req(input$annotation_button) > 0) {
-      annotation_function(cropped_dir = parseDirPath(roots = volumes, input$annotation_browse),
-                          weights_file = weights_file,
-                          yolo_dir = yolo_dir,
-                          acceleration = input$acceleration)
+      #target directory for annotation
+      directory <- parseDirPath(roots = volumes, input$annotation_browse)
+      #unlink previously created tempdirs
+      unlink(paste0(normalizePath(tempdir()), "/", dir(tempdir())), recursive = TRUE)
+      
+      #generate new temp dirs using chunking function
+      temp_dirs <- chunking_function(directory = directory)
+      withProgressWaitress({for (chunk in seq_along(temp_dirs)) {
+        annotation_function(cropped_dir = temp_dirs[[chunk]],
+                            weights_file = weights_file,
+                            yolo_dir = yolo_dir,
+                            acceleration = input$acceleration, 
+                            project = directory)
+        #print(list.files(temp_dirs[[chunk]])) #for troubleshooting
+        incProgressWaitress(1) #update the progress bar incrementally
+      }}, selector = "#annotation_button", max = 10, theme = "overlay-percent")
     }
   })
-  
+
   #what to do if verification_browse is pressed
   observeEvent(eventExpr = input$verification_browse, {
     if (!is_empty(input$verification_browse)){
@@ -162,9 +207,12 @@ server <- function(input, output, session) {
   #what to do if prep_button is pressed
   observeEvent(eventExpr = input$prep_button, {
     if (req(input$prep_button) > 0) {
+      waitress <- Waitress$new("#prep_button", theme = "overlay", infinite = TRUE)
+      waitress$start()
       prep_function(cropped_dir = parseDirPath(roots = volumes, input$cropped_images_path),
                     start_point = input$start_point,
                     stop_point = input$end_point)
+      waitress$close()
     }
   })
   
@@ -180,7 +228,10 @@ server <- function(input, output, session) {
   observeEvent(eventExpr = input$analysis_button, {
     shiny::req(input$analysis_browse)
     if (req(input$analysis_button) > 0) {
+      waitress <- Waitress$new("#analysis_button", theme = "overlay", infinite = TRUE)
+      waitress$start()
       analysis_function(cropped_dir = parseDirPath(roots = volumes, input$analysis_browse))
+      waitress$close() # hide when done
     }
   })
  }

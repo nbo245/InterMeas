@@ -5,5 +5,5 @@
 
 yolo_dir c:/Users/Norbe/Desktop/a_thing/InterMeas/yolov5/
 labelImg_dir d:/labelImg/
-yolo_weights best_nodes.pt
+yolo_weights best_nodes.torchscript
 
