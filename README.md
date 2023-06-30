@@ -7,11 +7,13 @@ This Shiny app uses the [YOLOv5](https://github.com/ultralytics/yolov5) object d
 ## Installation
 1) Download and install [Anaconda](https://www.anaconda.com/download).
    - *Optional:* If you have access to a CUDA capable GPU, install the appropriate CUDA [drivers](https://developer.nvidia.com/cuda-11-8-0-download-archive)
+2) Download [LabelImg](https://pypi.org/project/labelImg/) 
 2) Download this repo.
 3) Open anaconda terminal and navigate into the InterMeas directory.
 4) Run setup_environment.py script to create anaconda environment used by the main script.
-5) Clone and setup the [YOLOv5 algorithm](https://github.com/ultralytics/yolov5)
-6) Setup configs_mod.txt file w/ correct filepaths for the YOLOv5 directory, the LabelImg directory, and the location of the best_nodes.pt file needed to identify maize nodal structures. 
+   - python setup_environment.py
+6) Clone and setup the [YOLOv5 algorithm](https://github.com/ultralytics/yolov5)
+7) Setup configs_mod.txt file w/ correct filepaths for the YOLOv5 directory, the LabelImg directory, and the location of the best_nodes.pt file needed to identify maize nodal structures. 
 
 ## Usage 
 1) Select directory containing full-sized images ready for analysis by using the **Original Images** button to select appropriate target directory.
@@ -51,6 +53,8 @@ The output of **Run Analysis** button is a file called data_output.xlsx.  The fi
 - converter: The width of an individual image in pixels divided by the known width of the imaging background (defaults to a 36 inch width; can be changed by modifying line 114 in the helper_functions.R script)
 - Total_Internodes: The number of unique internodes idenified in a stalk
 - Sum_Internodes: The sum length of all imaged internodes in centimeters.
+- z_score: The z-score furthest from zero for an internode measured along a particular stalk.  Useful for identifying erronously annotated images.
+- outliers: Boolean that returns true if a z_score for an internodal measurement is >= 2 or <=-2; useful for quickly identifying images that might need their annotations double checked.
 - Internode_x: The length (in centimeters) of the "xth" internode below the primary ear bearing internode.
 
 ## Tip
