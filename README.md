@@ -7,13 +7,16 @@ This Shiny app uses the [YOLOv5](https://github.com/ultralytics/yolov5) object d
 ## Installation
 1) Download and install [Anaconda](https://www.anaconda.com/download).
    - *Optional:* If you have access to a CUDA capable GPU, install the appropriate CUDA [drivers](https://developer.nvidia.com/cuda-11-8-0-download-archive)
-2) Download [LabelImg](https://pypi.org/project/labelImg/) 
-2) Download this repo.
-3) Open anaconda terminal and navigate into the InterMeas directory.
+2) Open anaconda terminal and navigate into a place you can easily find in the future such as your Desktop.
+   - *cd Desktop/*
+3) Clone this repo via git.
+   - *git clone https://github.com/nbo245/InterMeas*
+   - If you need to download git: *conda install -c anaconda git*
 4) Run setup_environment.py script to create anaconda environment used by the main script.
-   - python setup_environment.py
-6) Clone and setup the [YOLOv5 algorithm](https://github.com/ultralytics/yolov5)
-7) Setup configs_mod.txt file w/ correct filepaths for the YOLOv5 directory, the LabelImg directory, and the location of the best_nodes.pt file needed to identify maize nodal structures. 
+   - *cd InterMeas/*
+   - *python setup_environment.py*
+7) Clone and setup the [YOLOv5 algorithm](https://github.com/ultralytics/yolov5)
+8) Setup configs_mod.txt file w/ correct filepaths for the YOLOv5 directory, the LabelImg directory, and the location of the best_nodes.torchscript file needed to identify maize nodal structures. 
 
 ## Usage 
 1) Select directory containing full-sized images ready for analysis by using the **Original Images** button to select appropriate target directory.
