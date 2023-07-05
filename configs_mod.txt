@@ -3,7 +3,8 @@
 #for example, if the yolov5 clone is on your desktop on your c drive, change line 6 below to read:
 #yolo_dir c:/Users/<your username here>/Desktop/yolov5/
 
-yolo_dir path/to/yolov5/
+yolo_dir c:/Users/Norbe/Desktop/a_thing/InterMeas/yolov5/
 labelImg_dir d:/labelImg/
 yolo_weights best_nodes.torchscript
+username Norbe
 

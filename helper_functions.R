@@ -169,14 +169,14 @@ chunking_function <- function(directory){
   #Get the list of files in the directory
   files <- list.files(directory, full.names = TRUE)
   
-  temp_dirs <- lapply(1:10, function(i) {
+  temp_dirs <- lapply(1:5, function(i) {
     dir_name <- paste0(tempdir(), "/temp_dir_", i)
     dir.create(dir_name, recursive = TRUE)
     dir_name
   })
   
-  #Calculate the number of files to process (1/10th of total files)
-  numFilesToProcess <- ceiling(length(files) / 10)
+  #Calculate the number of files to process (1/5th of total files)
+  numFilesToProcess <- ceiling(length(files) / 5)
   
   #Create symbolic links to files in each temporary directory
   lapply(seq_along(temp_dirs), function(i) {

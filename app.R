@@ -22,16 +22,17 @@ pacman::p_load(shiny,
                #ggvis, 
                tidyverse)
 
-#setup python environments
-reticulate::use_condaenv("InterMeas", required = T)
-
-#py_config()#check environment was setup correctly
-
 #load in configurations
 configs <- read.delim("configs_mod.txt", header = F, sep = " ")
 yolo_dir <-trimws(configs[5,2])
 labelimg_location <- trimws(configs[6,2])
 weights_file <- trimws(configs[7,2])
+username <- trimws(configs[8,2])
+
+#setup python environments
+reticulate::use_python(paste0("C:/Users/",username,"/anaconda3/envs/InterMeas/python.exe"), required = T)
+reticulate::use_condaenv("InterMeas", required = T)
+#py_config()#check environment was setup correctly
 
 #initialize libraries for script and add yolo path 
 py_run_file("python_libraries.py") 
