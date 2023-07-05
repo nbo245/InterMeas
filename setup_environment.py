@@ -12,7 +12,7 @@ conda_packages = "python=3.8.5 psutil=5.8.0 tqdm=4.60.0 matplotlib=3.4.1 seaborn
 pip_packages = "opencv-python-headless PyYAML tensorboard"
 
 #Create Anaconda environment
-create_env_command = f"conda create --name {conda_env_name} {conda_packages} -c pytorch -c nvidia -y"
+create_env_command = f"conda create --name {conda_env_name} {conda_packages} -c pytorch -c nvidia -c conda-forge -y"
 subprocess.run(create_env_command, shell=True)
 
 print("Environment setup, adding additional packages now...")
