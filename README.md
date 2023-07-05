@@ -16,7 +16,7 @@ This Shiny app uses the [YOLOv5](https://github.com/ultralytics/yolov5) object d
    - *cd InterMeas/*
    - *python setup_environment.py*
 7) Clone and setup the [YOLOv5 algorithm](https://github.com/ultralytics/yolov5)
-8) Setup configs_mod.txt file w/ correct filepaths for the YOLOv5 directory, the LabelImg directory, and the location of the best_nodes.torchscript file needed to identify maize nodal structures. 
+8) Setup configs_mod.txt file w/ correct filepaths for the YOLOv5 directory, the LabelImg directory, the location of the best_nodes.torchscript file needed to identify maize nodal structures, and the username of the profile you're using (needed to setup default python location in anaconda environment). 
 
 ## Usage 
 1) Select directory containing full-sized images ready for analysis by using the **Original Images** button to select appropriate target directory.
