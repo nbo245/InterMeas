@@ -1,7 +1,6 @@
 #shiny app for using yolo object detection algo to measure internode lengths in
 #maize stalks
 
-#setwd("d:/2021_image_analysis/shiny_annotator_end_of_summer/shiny_annotator/")
 #load libraries required for shiny app
 
 if (!require("pacman")) install.packages("pacman")
@@ -27,10 +26,10 @@ configs <- read.delim("configs_mod.txt", header = F, sep = " ")
 yolo_dir <-trimws(configs[5,2])
 labelimg_location <- trimws(configs[6,2])
 weights_file <- trimws(configs[7,2])
-username <- trimws(configs[8,2])
+username <- Sys.info()["user"][[1]]
 
 #setup python environments
-reticulate::use_python(paste0("C:/Users/",username,"/anaconda3/envs/InterMeas/python.exe"), required = T)
+reticulate::use_python(trimws(read.delim("python_location.txt", header = F)[1,1]))
 reticulate::use_condaenv("InterMeas", required = T)
 #py_config()#check environment was setup correctly
 
@@ -153,7 +152,7 @@ server <- function(input, output, session) {
         cropper_function(temp_dirs[[chunk]])
         #print(list.files(temp_dirs[[chunk]])) #for troubleshooting
         incProgressWaitress(1) #update the progress bar incrementally
-      }}, selector = "#cropper_button", max = 10, theme = "overlay-percent")
+      }}, selector = "#cropper_button", max = 5, theme = "overlay-percent")
       }
   })
   
@@ -184,7 +183,7 @@ server <- function(input, output, session) {
                             project = directory)
         #print(list.files(temp_dirs[[chunk]])) #for troubleshooting
         incProgressWaitress(1) #update the progress bar incrementally
-      }}, selector = "#annotation_button", max = 10, theme = "overlay-percent")
+      }}, selector = "#annotation_button", max = 5, theme = "overlay-percent")
     }
   })
 

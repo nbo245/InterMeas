@@ -8,7 +8,7 @@ print("Setting up anaconda environment now...")
 
 #Create Anaconda environment
 conda_env_name = "InterMeas"
-conda_packages = "python=3.8.5 psutil=5.8.0 tqdm=4.60.0 matplotlib=3.4.1 opencv=4.7.0 seaborn=0.11.1 pytorch=2.0.1 torchvision=0.15.2 torchaudio=2.0.2 pytorch-cuda=11.8 cudatoolkit=11.5.0 lxml=4.9.2 pyyaml=6.0 tensorboard=2.13.0"
+conda_packages = "python=3.8.5 psutil=5.8.0 tqdm=4.60.0 matplotlib=3.4.1 opencv=4.7.0 seaborn=0.11.1 pytorch=2.0.1 torchvision=0.15.2 torchaudio=2.0.2 pytorch-cuda=11.8 cudatoolkit=11.5.0 lxml=4.9.2 pyyaml=6.0 tensorboard=2.13.0 m2-base"
 #pip_packages = "PyYAML tensorboard"
 
 #Create Anaconda environment
@@ -32,6 +32,10 @@ labelImg_install_command = f"git clone https://github.com/heartexlabs/labelImg"
 subprocess.run(labelImg_install_command, shell=True)
 labelImg_setup_command = f"pyrcc5 -o labelImg/libs/resources.py labelImg/resources.qrc"
 subprocess.run(labelImg_setup_command,shell = True)
+
+#locating python install path
+python_find_command = f"where python | head -n1 > python_location.txt"
+subprocess.run(python_find_command,shell = True)
 
 print("Setup complete.")
 
