@@ -26,7 +26,10 @@ python setup_environment.py
 7) Setup configs_mod.txt file w/ correct filepaths for the YOLOv5 directory, the LabelImg directory, and the location of the best_nodes.torchscript file needed to identify maize nodal structures.
 8) Open the app.R script in Rstudio and hit the **Run App** button to run through the guided workflow. (Note the tip at the bottom of the page for easier setup later)
 
-## Usage 
+## Interactive usage via R:
+Open R and source the autogenerator.R script.  Follow on-screen prompts to run through workflow.
+
+## Shiny Usage:
 1) Select directory containing full-sized images ready for analysis by using the **Original Images** button to select appropriate target directory.
    - Once target directory is selected, click **Select**.
    - Click **Run Cropping Script** button.
