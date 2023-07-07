@@ -6,7 +6,11 @@ if (!require("pacman")) install.packages("pacman")
 pacman::p_load(DT,
                reticulate,
                openxlsx,
-               tidyverse)
+               tidyverse,
+               rstudioapi)
+
+#make sure wd is set where this file resides
+setwd(dirname(getActiveDocumentContext()$path))
 
 #load in configurations
 configs <- read.delim("configs_mod.txt", header = F, sep = " ")
