@@ -39,8 +39,12 @@ subprocess.run(yolo_requirements_command, shell = True)
 
 #locating python install path
 print("Finding python path")
-location_command = f"python python_locator.py"
+location_command = f"python path_locator.py"
 subprocess.run(location_command, shell = True)
+
+#consolidating locations for config file:
+
+
 
 end = time.time()
 total = end - start

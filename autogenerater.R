@@ -13,16 +13,16 @@ pacman::p_load(DT,
 setwd(dirname(getActiveDocumentContext()$path))
 
 #load in configurations
-configs <- read.delim("configs_mod.txt", header = F, sep = " ")
-yolo_dir <-trimws(configs[5,2])
-labelimg_location <- trimws(configs[6,2])
-weights_file <- trimws(configs[7,2])
+configs <- read.delim("path_info.txt", header = F, sep = " ")
+yolo_dir <-trimws(configs[2,1])
+labelimg_location <- trimws(configs[3,1])
+weights_file <- trimws(configs[4,1])
 #username <- Sys.info()["user"][[1]]
 #input_directory <- "example_images/"
 
 #setup python environments
 #reticulate::use_python(paste0("C:/Users/",username,"/anaconda3/envs/InterMeas/python.exe"), required = T)
-reticulate::use_python(trimws(read.delim("python_location.txt", header = F)[1,1]))
+reticulate::use_python(trimws(read.delim("path_info.txt", header = F)[1,1]))
 reticulate::use_condaenv("InterMeas", required = T)
 #py_config()#check environment was setup correctly
 
