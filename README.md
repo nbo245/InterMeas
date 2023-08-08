@@ -8,9 +8,17 @@ This Shiny app uses the [YOLOv5](https://github.com/ultralytics/yolov5) object d
 1) Download and install [R and Rstudio](https://posit.co/download/rstudio-desktop/)
 2) Download and install [Anaconda](https://www.anaconda.com/download).
    - *Optional:* If you have access to a CUDA capable GPU, install the appropriate CUDA [drivers](https://developer.nvidia.com/cuda-11-8-0-download-archive)
+   - Annotation speeds significantly improve when using even a lower end CUDA-capable GPU:
+
+| Hardware      | Type          | Time (~sec/image) |
+| :------------ | :-----------: | ----------------: |
+| Intel i7-11370H @ 3.3GHz  | CPU  | 2.5 |
+| Intel Xeon E-2176G @ 3.7GHz  | CPU  | 2.2 |
+| NVIDIA Quadro P620  | GPU  | 0.4 |
+| NVIDIA RTX 3060 Laptop GPU | GPU  | 0.075 |
 3) Open anaconda terminal and navigate into a place you can easily find in the future such as your Desktop.
 ```bash
-cd Desktop/ #how to navigate to Desktop from your default home directory
+cd Desktop/ #navigate to Desktop from your default conda home directory
 ```
 4) Clone this repo via git.
 ```bash
@@ -20,16 +28,15 @@ git clone https://github.com/nbo245/InterMeas
 5) Run setup_environment.py script to create anaconda environment used by the main script.
 ```bash
 cd InterMeas/
-python setup_environment.py
+python setup_environment.py #this might take a few minutes depending on how many dependencies have to be installed
 ```
-6) Clone and setup the [YOLOv5 algorithm](https://github.com/ultralytics/yolov5)
-7) Setup configs_mod.txt file w/ correct filepaths for the YOLOv5 directory, the LabelImg directory, and the location of the best_nodes.torchscript file needed to identify maize nodal structures.
-8) Open the app.R script in Rstudio and hit the **Run App** button to run through the guided workflow. (Note the tip at the bottom of the page for easier setup later)
+6) The yolov5, labelImg, and filepaths should automatically download and populate info into a file called path_info.txt.  Please don't delete or modify this file for now, it contains the filepaths for various dependencies needed by the main scripts...
+7) Open the app.R script in Rstudio and hit the **Run App** button to run through the guided workflow. (Note the tip at the bottom of the page for easier setup later)
 
 ## Interactive usage via R:
-Open R and source the autogenerator.R script.  Follow on-screen prompts to run through workflow.
+Open R and run the run_autogenerator.R script.  Follow on-screen prompts to run through workflow.
 
-## Shiny Usage:
+## Shiny Usage (use the example_images directory supplied in this repo):
 1) Select directory containing full-sized images ready for analysis by using the **Original Images** button to select appropriate target directory.
    - Once target directory is selected, click **Select**.
    - Click **Run Cropping Script** button.
