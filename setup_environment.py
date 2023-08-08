@@ -5,52 +5,64 @@ import os
 import time
 import subprocess
 
-start = time.time()
-print("Setting up anaconda environment now...")
-
 #Create Anaconda environment
 conda_env_name = "InterMeas"
-conda_packages = "python=3.8.5 psutil=5.8.0 tqdm=4.60.0 matplotlib=3.4.1 opencv=4.7.0 seaborn=0.11.1 pytorch=2.0.1 torchvision=0.15.2 torchaudio=2.0.2 pytorch-cuda=11.8 cudatoolkit=11.5.0 lxml=4.9.2 pyyaml=6.0 tensorboard=2.13.0 m2-base"
+conda_packages = "python=3.8.5 psutil=5.8.0 tqdm=4.64.0 matplotlib=3.4.1 opencv=4.7.0 seaborn=0.11.1 pytorch=2.0.1 torchvision=0.15.2 torchaudio=2.0.2 pytorch-cuda=11.8 cudatoolkit=11.5.0 lxml pyyaml=6.0 tensorboard=2.13.0 m2-base ultralytics"
+current_location = os.getcwd()
 
-#Create Anaconda environment
-create_env_command = f"conda create --name {conda_env_name} {conda_packages} -c pytorch -c nvidia -c conda-forge -c menpo -y"
-subprocess.run(create_env_command, shell=True)
+#defs to make sure things get installed correctly on a spotty internet connection...
+def run_command(command, retries=3):
+    for i in range(retries):
+        result = subprocess.run(command, shell=True, check=True)
+        if result.returncode == 0:
+            return True
+        print(f"Command failed. Retry {i+1}/{retries}...")
+    return False
 
-print("Environment setup, adding additional packages now...")
+def setup_environment():
+    start = time.time()
 
-#Activate Anaconda environment
-activate_env_command = f"conda activate {conda_env_name}"
-subprocess.run(activate_env_command, shell=True)
+    print("Setting up environment...")
 
-print("Installing labelImg")
+    create_environment() #create InterMeas Env
+    launch_environment() #launch it
+    install_labelimg() #install labelimg for manual annotation checks
+    install_yolov5() #install yolov5 for automatic annotations
+#    install_yolo_reqs()
+    locate_python_path() #add paths to a file
 
-#Install labelImg
-labelImg_install_command = f"git clone https://github.com/heartexlabs/labelImg"
-subprocess.run(labelImg_install_command, shell=True)
-labelImg_setup_command = f"pyrcc5 -o labelImg/libs/resources.py labelImg/resources.qrc"
-subprocess.run(labelImg_setup_command,shell = True)
+    run_command("conda deactivate")
+    end = time.time()
+    total = end - start
+    print("Setup complete in " + "%.2f" % total + " seconds.")
 
-#Install yolov5
-print("Installing yolov5")
-yolo_install_command = f"git clone https://github.com/ultralytics/yolov5"
-yolo_requirements_command = f"pip install -r yolov5/requirements.txt"
-subprocess.run(yolo_install_command, shell = True)
-subprocess.run(yolo_requirements_command, shell = True)
+def create_environment():
+    print("Initilizing Environment, this might take a while...")
+    run_command("conda install -n base conda-libmamba-solver -y") #install libmamba for faster environment solving
+    run_command(f"conda create --name {conda_env_name} {conda_packages} -c pytorch -c nvidia -c conda-forge -c menpo -c anaconda -y --solver=libmamba")
 
-#locating python install path
-print("Finding python path")
-location_command = f"python path_locator.py"
-subprocess.run(location_command, shell = True)
+def launch_environment():
+    print("Launching InterMeas Env.")
+    run_command("conda activate InterMeas")
 
-#consolidating locations for config file:
+def install_labelimg():
+    print("Installing labelImg")
+    run_command("git clone https://github.com/heartexlabs/labelImg")
+    run_command("python -m pip install pyqt5-tools")
+    run_command("pyrcc5 -o labelImg/libs/resources.py labelImg/resources.qrc")
 
+def install_yolov5():
+    print("Installing yolov5")
+    run_command("git clone https://github.com/ultralytics/yolov5")
+#    run_command("python -m pip install -r yolov5/requirements.txt")
 
+def install_yolo_reqs():
+    print("Intalling yolo_reqs")
+    run_command("python -m pip install ultralytics")
 
-end = time.time()
-total = end - start
-print("Setup complete in " + "%.2f" % total + " seconds.")
+def locate_python_path():
+    print("Finding python path")
+    run_command("python path_locator.py")
 
-# Deactivate Anaconda environment
-deactivate_env_command = "conda deactivate"
-subprocess.run(deactivate_env_command, shell=True)
-
+if __name__ == "__main__":
+    setup_environment()

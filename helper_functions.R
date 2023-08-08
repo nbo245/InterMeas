@@ -147,13 +147,13 @@ analysis_function <- function(cropped_dir){
   
   annotation_info$z_score <- z_score
   
-  # Identify outliers; 2x the z-score ~95% confidence interval for a normally distributed dataset
+  #Identify outliers; 2x the z-score ~95% confidence interval for a normally distributed dataset
   annotation_info$outliers <- annotation_info$z_score >= 2 | annotation_info$z_score <= -2
 
   #widen data
   wide_data<- annotation_info %>%
     group_by(annotation_id) %>%
-    mutate(max_z_score = if_else(abs(z_score) == max(abs(z_score)), z_score, NA)) %>%
+    mutate(max_z_score = ifelse(abs(z_score) == max(abs(z_score)), z_score, NA)) %>%
     tidyr::fill(max_z_score) %>%
     spread(Internode, Distance) %>%
     summarize(across(everything(), ~ first(na.omit(.))))

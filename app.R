@@ -9,14 +9,14 @@ pacman::p_load(shiny,
                #fs,
                shinydashboard,
                shinyFiles,
-               slickR,
+               #slickR,
                #flexdashboard,
                DT,
                reticulate,
                openxlsx,
                #shinyWidgets,
                waiter,
-               VCA,
+               #VCA,
                #rhandsontable,
                #ggvis, 
                tidyverse,
@@ -26,15 +26,13 @@ pacman::p_load(shiny,
 setwd(dirname(getActiveDocumentContext()$path))
 
 #load in configurations
-configs <- read.delim("path_info.txt", header = F, sep = " ")
-yolo_dir <-trimws(configs[2,1])
-labelimg_location <- trimws(configs[3,1])
-weights_file <- trimws(configs[4,1])
-#username <- Sys.info()["user"][[1]]
+configs <- read.delim("path_info.txt", header = F)
+yolo_dir <-gsub('\\\\','/',trimws(configs[2,1]))
+labelimg_location <- gsub("\\\\","/",trimws(configs[3,1]))
+weights_file <- gsub('\\\\','/',trimws(configs[4,1]))
 #input_directory <- "example_images/"
 
 #setup python environments
-#reticulate::use_python(paste0("C:/Users/",username,"/anaconda3/envs/InterMeas/python.exe"), required = T)
 reticulate::use_python(trimws(read.delim("path_info.txt", header = F)[1,1]))
 reticulate::use_condaenv("InterMeas", required = T)
 #py_config()#check environment was setup correctly
@@ -49,8 +47,8 @@ ui <- dashboardPage(
   dashboardHeader(title = "InterMeas"),
   dashboardSidebar(
     sidebarMenu(id = "sidebar",
-                menuItem("Inputs", tabName = "inputs", icon = icon("file-upload")),
-                menuItem("Results", tabName = "results", icon = icon("table")))),
+                menuItem("Inputs", tabName = "inputs", icon = icon("file-upload")))),
+                #menuItem("Results", tabName = "results", icon = icon("table")))),
   dashboardBody(
     tabItems(
       # Dashboard layout for Inputs screen

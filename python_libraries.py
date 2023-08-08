@@ -12,7 +12,6 @@ import glob
 import inspect
 import logging
 import math
-import os
 import platform
 import random
 import re
@@ -36,16 +35,16 @@ import yaml
 
 
 # Open the configs file and read the 6th line
-with open('configs_mod.txt', 'r') as f:
+with open('path_info.txt', 'r') as f:
     check = f.readlines()
 
 #append path to sys    
-sys.path.append(check[5].strip()[9:]) #append yolo dir path from 6th line of configs file
+sys.path.append(check[2]) #append yolo dir path from 6th line of configs file
 root_path = os.getcwd()
 #print("root=",root_path)
 
-os.chdir(check[5].strip()[9:]) #go to yolo dir
-os.chdir("..")
+os.chdir(root_path) #go to yolo dir
+#os.chdir("..") 
 
 #current_path=os.getcwd()
 #print("yolo_path=",current_path)
