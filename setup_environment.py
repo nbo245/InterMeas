@@ -28,7 +28,7 @@ def setup_environment():
     launch_environment() #launch it
     install_labelimg() #install labelimg for manual annotation checks
     install_yolov5() #install yolov5 for automatic annotations
-#    install_yolo_reqs()
+    labelimg_classes() #modify prexisting labels for labelimg
     locate_python_path() #add paths to a file
 
     run_command("conda deactivate")
@@ -63,6 +63,9 @@ def install_yolo_reqs():
 def locate_python_path():
     print("Finding python path")
     run_command("python path_locator.py")
+
+def labelimg_classes():
+    run_command("rm labelImg/data/predefined_classes.txt && echo node >> labelImg/data/predefined_classes.txt")
 
 if __name__ == "__main__":
     setup_environment()
