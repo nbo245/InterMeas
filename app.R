@@ -30,11 +30,12 @@ configs <- read.delim("path_info.txt", header = F)
 yolo_dir <-gsub('\\\\','/',trimws(configs[2,1]))
 labelimg_location <- gsub("\\\\","/",trimws(configs[3,1]))
 weights_file <- gsub('\\\\','/',trimws(configs[4,1]))
-#input_directory <- "example_images/"
+conda_path <- trimws(configs[1,1])
 
 #setup python environments
 reticulate::use_python(trimws(read.delim("path_info.txt", header = F)[1,1]))
-reticulate::use_condaenv("InterMeas", required = T)
+reticulate::use_condaenv("InterMeas", required = T, conda = paste(strsplit(conda_path,"envs")[[1]][1],"condabin/conda", sep = ""))
+
 #py_config()#check environment was setup correctly
 
 #initialize libraries for script and add yolo path 
@@ -150,13 +151,18 @@ server <- function(input, output, session) {
       #unlink previously created tempdirs
       unlink(paste0(normalizePath(tempdir()), "/", dir(tempdir())), recursive = TRUE)
       
-      #generate new temp dirs using chunking function
-      temp_dirs <- chunking_function(directory = directory)
-      withProgressWaitress({for (chunk in seq_along(temp_dirs)) {
-        cropper_function(temp_dirs[[chunk]])
-        #print(list.files(temp_dirs[[chunk]])) #for troubleshooting
-        incProgressWaitress(1) #update the progress bar incrementally
-      }}, selector = "#cropper_button", max = 5, theme = "overlay-percent")
+      #crop w/ infinite progress bar - chunking takes too long
+      waitress <- Waitress$new("#cropper_button", theme = "overlay-percent", infinite = TRUE)
+      waitress$start()
+      cropper_function(directory)
+      waitress$close()
+      # #generate new temp dirs using chunking function
+      # temp_dirs <- chunking_function(directory = directory)
+      # withProgressWaitress({for (chunk in seq_along(temp_dirs)) {
+      #   cropper_function(temp_dirs[[chunk]])
+      #   #print(list.files(temp_dirs[[chunk]])) #for troubleshooting
+      #   incProgressWaitress(1) #update the progress bar incrementally
+      # }}, selector = "#cropper_button", max = 5, theme = "overlay-percent")
       }
   })
   
@@ -177,17 +183,26 @@ server <- function(input, output, session) {
       #unlink previously created tempdirs
       unlink(paste0(normalizePath(tempdir()), "/", dir(tempdir())), recursive = TRUE)
       
+      #annotate w/ infinite progress bar - chunking takes too long
+      waitress <- Waitress$new("#annotation_button", theme = "overlay-percent", infinite = TRUE)
+      waitress$start()
+      annotation_function(cropped_dir = directory,
+                          weights_file = weights_file,
+                          yolo_dir = yolo_dir,
+                          acceleration = input$acceleration, 
+                          project = directory)
+      waitress$close()
       #generate new temp dirs using chunking function
-      temp_dirs <- chunking_function(directory = directory)
-      withProgressWaitress({for (chunk in seq_along(temp_dirs)) {
-        annotation_function(cropped_dir = temp_dirs[[chunk]],
-                            weights_file = weights_file,
-                            yolo_dir = yolo_dir,
-                            acceleration = input$acceleration, 
-                            project = directory)
-        #print(list.files(temp_dirs[[chunk]])) #for troubleshooting
-        incProgressWaitress(1) #update the progress bar incrementally
-      }}, selector = "#annotation_button", max = 5, theme = "overlay-percent")
+      # temp_dirs <- chunking_function(directory = directory)
+      # withProgressWaitress({for (chunk in seq_along(temp_dirs)) {
+      #   annotation_function(cropped_dir = temp_dirs[[chunk]],
+      #                       weights_file = weights_file,
+      #                       yolo_dir = yolo_dir,
+      #                       acceleration = input$acceleration, 
+      #                       project = directory)
+      #   #print(list.files(temp_dirs[[chunk]])) #for troubleshooting
+      #   incProgressWaitress(1) #update the progress bar incrementally
+      # }}, selector = "#annotation_button", max = 5, theme = "overlay-percent")
     }
   })
 
@@ -211,7 +226,7 @@ server <- function(input, output, session) {
   #what to do if prep_button is pressed
   observeEvent(eventExpr = input$prep_button, {
     if (req(input$prep_button) > 0) {
-      waitress <- Waitress$new("#prep_button", theme = "overlay", infinite = TRUE)
+      waitress <- Waitress$new("#prep_button", theme = "overlay-percent", infinite = TRUE)
       waitress$start()
       prep_function(cropped_dir = parseDirPath(roots = volumes, input$cropped_images_path),
                     start_point = input$start_point,
@@ -232,7 +247,7 @@ server <- function(input, output, session) {
   observeEvent(eventExpr = input$analysis_button, {
     shiny::req(input$analysis_browse)
     if (req(input$analysis_button) > 0) {
-      waitress <- Waitress$new("#analysis_button", theme = "overlay", infinite = TRUE)
+      waitress <- Waitress$new("#analysis_button", theme = "overlay-percent", infinite = TRUE)
       waitress$start()
       analysis_function(cropped_dir = parseDirPath(roots = volumes, input$analysis_browse))
       waitress$close() # hide when done
