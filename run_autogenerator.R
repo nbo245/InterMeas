@@ -4,4 +4,3 @@ library(rstudioapi)
 setwd(dirname(getActiveDocumentContext()$path))
 
 source("autogenerater.R")
-#source("InterMeas_anaconda.R")
